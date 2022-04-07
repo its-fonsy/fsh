@@ -1,2 +1,2 @@
-# fsh
-basic shell written in C
+# f(onsy)sh
+A basic shell written in C
