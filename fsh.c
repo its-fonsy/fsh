@@ -6,48 +6,42 @@
 #define	FSH_AB_SIZE	128
 
 char **fsh_split_input(char *line) {
-	int i, j = 0;
 	int buff_size = FSH_AB_SIZE;
+	int i = 0, j= 0;
+	char c;
 	bool quoted = false;
 	char **args = (char **) malloc( buff_size * sizeof(char*) );
 
-	args[j] = &line[0];
-	j++;
-	for(i=0; line[i] != '\0'; i++) {
+	args[j++] = &line[i];
+	while(1) {
+		c = line[i];
 
-		/* Reallocate memory if necessary */
-		if( i > buff_size ) {
+		if (c == '\0')
+			return args;
+
+		/* Increase memory allocation for the arguments */
+		if( j >  buff_size) {
 			buff_size += FSH_AB_SIZE;
-			args = realloc(args, buff_size * sizeof(char));
+			args = realloc(args, buff_size * sizeof(char*));
 		}
 
-		/* Tokenize argument separated by space */
-		if(line[i] == ' ' && !quoted) {
+		/* Check for quoted arguments */
+		if( c == '"') {
+			line[i] = '\0';
+			quoted = !quoted;
+			if(quoted)
+				args[j-1] = &line[i+1];
+		}
+
+		/* Separate argument with spaces */
+		if( c == ' ' && !quoted) {
 			line[i] = '\0';
 			args[j] = &line[i+1];
 			j++;
 		}
 
-		/* Tokenize arguments between quotes */
-		if(line[i] == '"') {
-			if(quoted) {
-				/* second quotation mark */
-				line[i] = '\0';
-				args[j] = &line[i+2];
-				j++;
-				i++;
-				quoted = false;
-			} else {
-				/* first quotation mark */
-				args[j-1] = &line[i+1];
-				quoted = true;
-			}
-		}
+		i++;
 	}
-
-	args[j] = NULL;
-
-	return args;
 }
 
 char *fsh_read_input() {
