@@ -1,9 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdbool.h>
 
 #define	FSH_LB_SIZE	128
 #define	FSH_AB_SIZE	128
+
+int fsh_exec(char **args) {
+	int error;
+	error = execvp(args[0], args);
+
+	if(error)
+      fprintf(stderr, "fsh: command %s not found\n", args[0]);
+}
 
 char **fsh_split_input(char *line) {
 	int buff_size = FSH_AB_SIZE;
@@ -81,6 +90,7 @@ int main(void)
 	printf("fsh> ");
 	user_line = fsh_read_input();
 	args = fsh_split_input(user_line);
+	fsh_exec(args);
 
 	return 0;
 }
