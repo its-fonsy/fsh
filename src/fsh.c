@@ -39,6 +39,7 @@ int fsh_exec(char **args) {
 
 		waitpid(pid, NULL, 0);
 	}
+	return 1;
 }
 
 char **fsh_split_input(char *line) {

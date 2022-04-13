@@ -1,24 +1,34 @@
-CC = cc
+# directory structure
+SRC_DIR = src
+INC_DIR = inc
+OBJ_DIR = obj
 
-LDFLAGS = 
-CFLAGS  = 
-PROG = fsh
+# compiler and target
+CC	= cc
+TARGET	= fsh
 
-SRC = fsh.c
-OBJ = ${SRC:.c=.o}
-INC =
+# flags
+CFLAGS	= -Wall -Wextra -Werror -pedantic -g -O0 -I$(INC_DIR)
+LFLAGS	= -Wall -Wextra -Werror
 
-all: ${PROG}
+# declaration variables
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+INCS := $(wildcard $(INC_DIR)/*.h)
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-${OBJ}: ${INC}
+# Linking
+$(TARGET): $(OBJS)
+	$(CC) $(LFLAGS) -o $@ $(OBJS) 
 
-${PROG}: ${OBJ}
-	$(CC) -o $@ $(OBJ) $(LDFLAGS)
+# Compilation
+$(OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+	mkdir -p $(OBJ_DIR)
+	$(CC) -c $(CFLAGS) $< -o $@
 
-run: ${PROG}
-	./fsh
-
+# clean
 clean:
-	rm -f ${PROG} ${OBJ}
+	@rm -rf $(OBJS) $(OBJ_DIR) $(TARGET)
 
-.PHONY:  all run clean
+all: $(TARGET)
+
+.PHONY: clean all

@@ -1,3 +1,6 @@
+# Ignoring target
+fsh
+
 # Prerequisites
 *.d
 
