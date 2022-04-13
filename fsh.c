@@ -2,16 +2,43 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <sys/wait.h>
 
 #define	FSH_LB_SIZE	128
 #define	FSH_AB_SIZE	128
 
 int fsh_exec(char **args) {
 	int error;
-	error = execvp(args[0], args);
+	int argc;
+	bool bg = false;
 
-	if(error)
-      fprintf(stderr, "fsh: command %s not found\n", args[0]);
+	/* get the number of arguments */
+	for(argc = 0; args[argc] != NULL; argc++)
+		;
+
+	/* if the last char is a '&' then execute command in background */
+	if (args[argc-1][0] == '&') {
+		bg = true;
+		args[argc-1] = NULL;
+	}
+
+	pid_t pid = fork();
+
+	if( pid == 0 ) {
+
+		error = execvp(args[0], args);
+		if(error)
+			fprintf(stderr, "fsh: command %s not found\n", args[0]);
+
+		return 0;
+
+	} else {
+
+		if(bg)
+			printf("should exec in background\n");
+
+		waitpid(pid, NULL, 0);
+	}
 }
 
 char **fsh_split_input(char *line) {
@@ -25,8 +52,10 @@ char **fsh_split_input(char *line) {
 	while(1) {
 		c = line[i];
 
-		if (c == '\0')
+		if (c == '\0') {
+			args[j] = NULL;
 			return args;
+		}
 
 		/* Increase memory allocation for the arguments */
 		if( j >  buff_size) {
@@ -87,10 +116,15 @@ int main(void)
 	char *user_line;
 	char **args;
 
-	printf("fsh> ");
-	user_line = fsh_read_input();
-	args = fsh_split_input(user_line);
-	fsh_exec(args);
+	while(1) {
+		printf("fsh> ");
+		user_line = fsh_read_input();
+		args = fsh_split_input(user_line);
+		fsh_exec(args);
+
+		free (user_line);
+		free (args);
+	}
 
 	return 0;
 }
