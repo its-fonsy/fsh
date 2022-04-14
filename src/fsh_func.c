@@ -1,4 +1,5 @@
 #include "fsh_func.h"
+#include <fcntl.h>
 
 int fsh_exec(char **args) {
 	int error;
@@ -19,6 +20,12 @@ int fsh_exec(char **args) {
 
 	if( pid == 0 ) {
 
+		if(bg) {
+			int fdout = open("/dev/null",O_WRONLY | O_CREAT, 0600);
+			dup2(fdout, STDOUT_FILENO);
+			close(fdout);
+		}
+
 		error = execvp(args[0], args);
 		if(error)
 			fprintf(stderr, "fsh: command %s not found\n", args[0]);
@@ -27,12 +34,14 @@ int fsh_exec(char **args) {
 
 	} else {
 
-		if(bg)
-			printf("should exec in background\n");
-
-		waitpid(pid, NULL, 0);
+		if(bg) {
+			waitpid(pid, NULL, WNOHANG);
+			return pid;
+		}
+		else
+			waitpid(pid, NULL, 0);
 	}
-	return 1;
+	return 0;
 }
 
 char **fsh_split_input(char *line) {
