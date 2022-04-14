@@ -1,21 +1,13 @@
 #include <signal.h>
 #include "fsh_func.h"
 #include "fsh.h"
+#include "proc.h"
 
-#define	FSH_BG_SIZE	16
-
-int bg_procs[FSH_BG_SIZE];
-int bg_proc_idx = 0;
 
 static void handler(int signo, siginfo_t *si, void *data) {
 	(void) signo;
 	(void) data;
-	for(int k = 0; k < FSH_BG_SIZE; k++)
-		if(si->si_pid == bg_procs[k]) {
-			printf("Process %d has finished", si->si_pid);
-			bg_proc_idx--;
-			break;
-		}
+	printf("Process %d has finished", si->si_pid);
 }
 
 int main(void)
@@ -23,6 +15,7 @@ int main(void)
 	char *user_line;
 	char **args;
 	int pid;
+	Proc *bg_proc_head = init_list();
 
 	struct sigaction sa;
 	sa.sa_flags = SA_SIGINFO;
@@ -34,8 +27,9 @@ int main(void)
 		user_line = fsh_read_input();
 		args = fsh_split_input(user_line);
 		pid = fsh_exec(args);
+
 		if (pid)
-			bg_procs[bg_proc_idx++] = pid;
+			continue;
 
 		free (user_line);
 		free (args);
