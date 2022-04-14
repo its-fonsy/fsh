@@ -8,8 +8,8 @@ CC	= cc
 TARGET	= fsh
 
 # flags
-CFLAGS	= -Wall -Wextra -Werror -pedantic -g -O0 -I$(INC_DIR)
-LFLAGS	= -Wall -Wextra -Werror
+CFLAGS	= -Wall -Wextra -pedantic -g -O0 -I$(INC_DIR)
+LFLAGS	= -Wall -Wextra
 
 # declaration variables
 SRCS := $(wildcard $(SRC_DIR)/*.c)
