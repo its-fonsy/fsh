@@ -9,6 +9,10 @@ typedef struct Proc {
 	struct Proc *prev;
 } Proc;
 
-Proc * init_list();
+Proc * create_proc(int p_pid, int p_id, char ** p_args);
+void append_proc(Proc *head, Proc *proc);
+void pop_proc(Proc *proc);
+void update_proc_ids(Proc *head);
+Proc * proc_in_list(Proc *head, int p_pid);
 
 #endif

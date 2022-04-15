@@ -3,11 +3,18 @@
 #include "fsh.h"
 #include "proc.h"
 
+Proc *bg_proc_head;
 
 static void handler(int signo, siginfo_t *si, void *data) {
 	(void) signo;
 	(void) data;
-	printf("Process %d has finished", si->si_pid);
+
+	Proc *p = proc_in_list(bg_proc_head, si->si_pid);
+	if( p != NULL) {
+		printf("\nProcess %s done\n", p->args[0]);
+		pop_proc(p);
+		update_proc_ids(bg_proc_head);
+	}
 }
 
 int main(void)
@@ -15,7 +22,7 @@ int main(void)
 	char *user_line;
 	char **args;
 	int pid;
-	Proc *bg_proc_head = init_list();
+	bg_proc_head = create_proc(0, 0, NULL);
 
 	struct sigaction sa;
 	sa.sa_flags = SA_SIGINFO;
@@ -28,11 +35,15 @@ int main(void)
 		args = fsh_split_input(user_line);
 		pid = fsh_exec(args);
 
-		if (pid)
-			continue;
+		/* pid > 0 means process is executed in background */
+		if(pid) {
+			append_proc( bg_proc_head, create_proc(pid, 0, args) );
+			update_proc_ids(bg_proc_head);
+		} else {
+			free (user_line);
+			free (args);
+		}
 
-		free (user_line);
-		free (args);
 	}
 
 	return 0;
