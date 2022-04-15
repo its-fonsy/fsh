@@ -27,7 +27,7 @@ int fsh_exec(char **args) {
 		}
 
 		error = execvp(args[0], args);
-		if(error)
+		if(error && args[0][0] != '\0')
 			fprintf(stderr, "fsh: command %s not found\n", args[0]);
 
 		return 0;
