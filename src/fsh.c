@@ -1,8 +1,11 @@
 #include <signal.h>
+
 #include "fsh_func.h"
 #include "fsh.h"
 #include "proc.h"
 
+/* head of the linked list that tracks
+ * background processes */
 Proc *bg_proc_head;
 
 static void handler(int signo, siginfo_t *si, void *data) {
@@ -11,7 +14,7 @@ static void handler(int signo, siginfo_t *si, void *data) {
 
 	Proc *p = proc_in_list(bg_proc_head, si->si_pid);
 	if( p != NULL) {
-		printf("\nProcess %s done\n", p->args[0]);
+		printf("\n[%d] Process %s done\n", p->pid, p->args[0]);
 		pop_proc(p);
 		update_proc_ids(bg_proc_head);
 	}

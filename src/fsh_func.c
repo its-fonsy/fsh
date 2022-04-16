@@ -1,9 +1,23 @@
-#include "fsh_func.h"
 #include <fcntl.h>
+#include <string.h>
+
+#include "fsh_func.h"
+
+/* List of builtin commands, followed by their corresponding functions. */
+char *builtin_str[] = {
+  "cd",
+  "exit"
+};
+
+int (*builtin_func[]) (char **) = {
+  &fsh_cd,
+  &fsh_exit
+};
 
 int fsh_exec(char **args) {
 	int error;
 	int argc;
+	int i;
 	bool bg = false;
 
 	/* get the number of arguments */
@@ -14,6 +28,18 @@ int fsh_exec(char **args) {
 	if (args[argc-1][0] == '&') {
 		bg = true;
 		args[argc-1] = NULL;
+	}
+
+	/* An empty command was entered. */
+	if (args[0][0] == '\0') {
+		return 0;
+	}
+
+	/* Executing a builtin function */
+	for (i = 0; i < fsh_num_builtins(); i++) {
+		if (strcmp(args[0], builtin_str[i]) == 0) {
+			return (*builtin_func[i])(args);
+		}
 	}
 
 	pid_t pid = fork();
@@ -27,7 +53,7 @@ int fsh_exec(char **args) {
 		}
 
 		error = execvp(args[0], args);
-		if(error && args[0][0] != '\0')
+		if(error)
 			fprintf(stderr, "fsh: command %s not found\n", args[0]);
 
 		return 0;
@@ -95,10 +121,10 @@ char *fsh_read_input() {
 
 	if(!user_line)
 		fprintf(stderr, "fsh: allocation error");
-	
+
 	while(1) {
 		c = getchar();
-		
+
 		if(c == '\n' || c == EOF) {
 			user_line[i] = '\0';
 			return user_line;
@@ -112,4 +138,23 @@ char *fsh_read_input() {
 		user_line[i] = c;
 		i++;
 	}
+}
+
+int fsh_num_builtins() {
+	return sizeof(builtin_str) / sizeof(char *);
+}
+
+int fsh_cd(char **args) {
+	if (args[1] == NULL) {
+		fprintf(stderr, "fsh: expected argument to \"cd\"\n");
+	} else {
+		if (chdir(args[1]) != 0) {
+			perror("fsh");
+		}
+	}
+	return 1;
+}
+
+int fsh_exit() {
+	exit(0);
 }
