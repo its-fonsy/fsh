@@ -2,15 +2,19 @@
 #include <string.h>
 
 #include "fsh_func.h"
+#include "proc.h"
+#include "fsh.h"
 
 /* List of builtin commands, followed by their corresponding functions. */
 char *builtin_str[] = {
   "cd",
+  "jobs",
   "exit"
 };
 
 int (*builtin_func[]) (char **) = {
   &fsh_cd,
+  &fsh_jobs,
   &fsh_exit
 };
 
@@ -152,6 +156,17 @@ int fsh_cd(char **args) {
 			perror("fsh");
 		}
 	}
+	return 1;
+}
+
+/*
+ * Builtin function that lists the current process in the background
+ */
+int fsh_jobs(char **args) {
+
+	for(Proc *p = bg_proc_head->next; p != NULL; p=p->next)
+		printf("[%d] %d %s\n", p->id, p->pid, p->args[0]);
+
 	return 1;
 }
 

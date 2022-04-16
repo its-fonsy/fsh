@@ -1,11 +1,6 @@
 #include <signal.h>
-
-#include "fsh_func.h"
 #include "fsh.h"
-#include "proc.h"
 
-/* head of the linked list that tracks
- * background processes */
 Proc *bg_proc_head;
 
 static void handler(int signo, siginfo_t *si, void *data) {
