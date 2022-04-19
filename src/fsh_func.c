@@ -162,7 +162,7 @@ int fsh_cd(char **args) {
 /*
  * Builtin function that lists the current process in the background
  */
-int fsh_jobs(char **args) {
+int fsh_jobs() {
 
 	for(Proc *p = bg_proc_head->next; p != NULL; p=p->next)
 		printf("[%d] %d %s\n", p->id, p->pid, p->args[0]);
